@@ -1,0 +1,161 @@
+/* admin.css */
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4; /* Light gray background */
+  line-height: 1.6; /* Improves readability */
+}
+
+header {
+  background-color: #333; /* Dark gray header */
+  color: white;
+  padding: 1em 0;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2em;
+}
+
+nav {
+  background-color: #444; /* Slightly lighter gray navigation */
+  padding: 0.5em 0;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+nav li {
+  display: inline;
+  margin: 0 1em;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  padding: 0.5em 1em;
+  border-radius: 5px; /* Rounded corners */
+  transition: background-color 0.3s ease; /* Smooth hover transition */
+}
+
+nav a:hover {
+  background-color: #666; /* Darker gray on hover */
+}
+
+main {
+  padding: 2em;
+}
+
+h2 {
+  margin-bottom: 1em;
+  color: #333; /* Dark gray headings */
+}
+
+form {
+  background-color: white;
+  padding: 1em;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  margin-bottom: 2em;
+}
+
+form div {
+  margin-bottom: 0.8em;
+}
+
+form label {
+  display: block;
+  margin-bottom: 0.5em;
+  font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"] {
+  width: 100%;
+  padding: 0.8em;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+form button[type="submit"] {
+  background-color: #333;
+  color: white;
+  padding: 0.8em 1.5em;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form button[type="submit"]:hover {
+  background-color: #555;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2em;
+}
+
+th,
+td {
+  padding: 0.8em;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+th {
+  background-color: #f0f0f0; /* Light gray table header */
+  font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* Alternating row colors */
+}
+
+tbody tr:hover {
+  background-color: #f0f0f0;
+}
+
+tbody button {
+  background-color: #4CAF50; /* Green button */
+  color: white;
+  border: none;
+  padding: 0.5em 1em;
+  margin: 0 0.5em;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+tbody button:last-child {
+  background-color: #f44336; /* Red button */
+}
+
+footer {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 1em 0;
+}
+
+/* Responsive Design (adjust as needed) */
+@media (max-width: 768px) {
+  nav ul {
+    text-align: left;
+  }
+  nav li {
+    display: block;
+    margin: 0.5em 0;
+  }
+}

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chi tiết đơn hàng - Burger House</title>
+  <link rel="stylesheet" href="/Css/Order/orderDetail.css">
+  <style></style>
+</head>
+<body>
+  <header>
+    Burger House
+  </header>
+  <nav>
+    <ul>
+      <li><a href="/">Trang chủ</a></li>
+      <li><a href="/api/orders/page">Đơn hàng của tôi</a></li>
+      <li><a href="/auth/logout">Đăng xuất</a></li>
+    </ul>
+  </nav>
+  <main>
+    <div class="container">
+      <div class="order-header">
+        <h2>Chi tiết đơn hàng #<span id="order-id">...</span></h2>
+      </div>
+      <div class="order-info">
+        <div>
+          <h4>Khách hàng</h4>
+          <p id="customer-id">...</p>
+        </div>
+        <div>
+          <h4>Tổng tiền</h4>
+          <p id="order-total">...</p>
+        </div>
+        <div>
+          <h4>Ngày đặt</h4>
+          <p id="order-created">...</p>
+        </div>
+        <div>
+          <h4>Trạng thái</h4>
+          <p id="order-status">...</p>
+        </div>
+      </div>
+      
+      <div class="order-info">
+        <div style="flex: 1;">
+          <h4>Địa chỉ giao hàng</h4>
+          <p id="shipping-address">...</p>
+        </div>
+        <div style="flex: 1;">
+          <h4>Ngày giao hàng dự kiến</h4>
+          <p id="estimated-delivery">...</p>
+        </div>
+      </div>
+      
+      <div class="order-items">
+        <h3>Danh sách sản phẩm</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Tên món</th>
+              <th>Số lượng</th>
+              <th>Đơn giá (VND)</th>
+              <th>Thành tiền (VND)</th>
+            </tr>
+          </thead>
+          <tbody id="order-items-tbody">
+            <!-- Sản phẩm trong đơn hàng sẽ được load ở đây -->
+          </tbody>
+        </table>
+      </div>
+      
+      <a href="/api/orders/page" class="btn-back">Quay lại đơn hàng</a>
+    </div>
+  </main>
+  <footer>
+    <p>&copy; 2025 Burger House. All rights reserved.</p>
+  </footer>
+  
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    // Lấy tham số từ URL
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    // Hàm lấy cookie theo tên
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      return parts.length === 2 ? parts.pop().split(";").shift() : null;
+    }
+
+    // Hàm giải mã token JWT
+    function parseToken(token) {
+      try {
+        const payload = token.split('.')[1];
+        return JSON.parse(atob(payload));
+      } catch (err) {
+        console.error("Lỗi khi giải mã token:", err);
+        return {};
+      }
+    }
+
+    // Hàm định dạng ngày
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleString('vi-VN');
+    }
+
+    // Hàm load chi tiết đơn hàng từ API
+    async function loadOrderDetails() {
+      try {
+        const orderId = getQueryParam('order_id');
+        if (!orderId) {
+          alert("Không tìm thấy mã đơn hàng.");
+          return;
+        }
+        const token = getCookie("token");
+        if (!token) {
+          alert("Bạn chưa đăng nhập.");
+          return;
+        }
+        // Giả sử API: GET /api/orders/:id trả về thông tin chi tiết đơn hàng
+        const response = await axios.get(`/api/orders/${orderId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const order = response.data;
+  
+        // Cập nhật thông tin đơn hàng
+        document.getElementById("order-id").textContent = order.order_id;
+        document.getElementById("customer-id").textContent = order.customer_id;
+        document.getElementById("order-total").textContent = order.total + " VND";
+        document.getElementById("order-created").textContent = formatDate(order.created_at);
+        document.getElementById("order-status").textContent = order.status;
+  
+        // Giả sử shipping chứa address và estimated_delivery
+        if(order.shipping) {
+          document.getElementById("shipping-address").textContent = order.shipping.address;
+          document.getElementById("estimated-delivery").textContent = formatDate(order.shipping.estimated_delivery);
+        } else {
+          document.getElementById("shipping-address").textContent = "Chưa cập nhật";
+          document.getElementById("estimated-delivery").textContent = "Chưa cập nhật";
+        }
+  
+        // Load danh sách sản phẩm (order items)
+        const itemsTbody = document.getElementById("order-items-tbody");
+        itemsTbody.innerHTML = "";
+        if (order.orderItems && order.orderItems.length > 0) {
+          order.orderItems.forEach(item => {
+            const row = document.createElement("tr");
+            // Tên món - giả sử có trường "name" trong orderItems, nếu không bạn có thể thêm bằng cách join với API khác
+            const nameTd = document.createElement("td");
+            nameTd.textContent = item.name || ("Món #" + item.food_id);
+            row.appendChild(nameTd);
+  
+            // Số lượng
+            const qtyTd = document.createElement("td");
+            qtyTd.textContent = item.quantity;
+            row.appendChild(qtyTd);
+  
+            // Đơn giá
+            const priceTd = document.createElement("td");
+            priceTd.textContent = item.price;
+            row.appendChild(priceTd);
+  
+            // Thành tiền
+            const totalTd = document.createElement("td");
+            totalTd.textContent = (item.price * item.quantity).toFixed(2);
+            row.appendChild(totalTd);
+  
+            itemsTbody.appendChild(row);
+          });
+        } else {
+          itemsTbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Không có sản phẩm nào.</td></tr>`;
+        }
+  
+      } catch (error) {
+        console.error("Lỗi khi tải chi tiết đơn hàng:", error);
+        alert("Không thể tải chi tiết đơn hàng. Vui lòng thử lại!");
+      }
+    }
+  
+    // Gọi hàm loadOrderDetails khi trang được load
+    loadOrderDetails();
+  </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Đơn hàng của tôi - Burger House</title>
+  <link rel="stylesheet" href="/Css/Order/order.css">
+  <style></style>
+</head>
+<body>
+  <header>
+    <h1>Burger House</h1>
+  </header>
+  <nav>
+    <ul>
+      <li><a href="/">Trang chủ</a></li>
+      <li><a href="/api/orders/page">Đơn hàng của tôi</a></li>
+      <li><a href="/auth/logout">Đăng xuất</a></li>
+    </ul>
+  </nav>
+  <main>
+    <div class="order-container">
+      <h2>Đơn hàng của tôi</h2>
+      <div id="orders-list">
+        <!-- Danh sách đơn hàng sẽ được load ở đây -->
+      </div>
+    </div>
+  </main>
+  <footer>
+    <p>&copy; 2025 Burger House. All rights reserved.</p>
+  </footer>
+  
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    // Hàm lấy cookie theo tên
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      return parts.length === 2 ? parts.pop().split(";").shift() : null;
+    }
+  
+    // Hàm giải mã token JWT (giả sử token chứa "user_id")
+    function parseToken(token) {
+      try {
+        const payload = token.split('.')[1];
+        return JSON.parse(atob(payload));
+      } catch (err) {
+        console.error("Lỗi khi giải mã token:", err);
+        return {};
+      }
+    }
+  
+    // Hàm load danh sách đơn hàng của người dùng
+    async function loadOrders() {
+      try {
+        const token = getCookie("token");
+        if (!token) {
+          console.error("Người dùng chưa đăng nhập!");
+          return;
+        }
+  
+        // Gọi API để lấy tất cả đơn hàng
+        const response = await axios.get("/api/orders", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const orders = response.data; // Mảng đơn hàng
+        const tokenPayload = parseToken(token);
+        // Lọc các đơn hàng theo user_id từ token
+        const userOrders = orders.filter(order => order.customer_id === tokenPayload.user_id);
+  
+        const ordersList = document.getElementById("orders-list");
+        ordersList.innerHTML = "";
+        if (userOrders.length === 0) {
+          ordersList.innerHTML = "<p>Không có đơn hàng nào.</p>";
+          return;
+        }
+  
+        userOrders.forEach(order => {
+          // Tạo một khối đơn hàng hiển thị thông tin cơ bản
+          const orderDiv = document.createElement("div");
+          orderDiv.className = "order";
+          orderDiv.innerHTML = `
+            <h4>Đơn hàng #${order.order_id} - ${order.status}</h4>
+            <p>Tổng tiền: ${order.total} VND</p>
+            <p>Ngày đặt: ${new Date(order.created_at).toLocaleString('vi-VN')}</p>
+            <button onclick="viewOrderDetails(${order.order_id})">Xem chi tiết</button>
+          `;
+          ordersList.appendChild(orderDiv);
+        });
+      } catch (error) {
+        console.error("Lỗi khi tải đơn hàng:", error);
+      }
+    }
+  
+    // Hàm xem chi tiết đơn hàng (chuyển hướng hoặc mở modal)
+    function viewOrderDetails(orderId) {
+      window.location.href = `/api/orders/pageDetail/?order_id=${orderId}`;
+    }
+  
+    // Gọi hàm loadOrders khi trang được load
+    loadOrders();
+  </script>
+</body>
+</html>

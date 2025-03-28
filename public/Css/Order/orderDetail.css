@@ -1,0 +1,236 @@
+/* -----------------------
+   Reset & Base
+------------------------ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #fff3dc; /* Màu nền nhạt, giảm sáng */
+    color: #333;
+    height: 100%;
+  }
+  
+  /* -----------------------
+     Header
+  ------------------------ */
+  header {
+    background: linear-gradient(90deg, #ec9a00, #f0bc4a); /* Dải màu cam - vàng */
+    padding: 20px;
+    text-align: center;
+    color: #fff;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  
+  /* -----------------------
+     Navigation
+  ------------------------ */
+  nav {
+    background-color: #ec9a00;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+  }
+  
+  nav ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+  }
+  
+  nav ul li {
+    margin: 0 15px;
+  }
+  
+  nav ul li a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 1rem;
+    transition: color 0.3s;
+    font-weight: 500;
+  }
+  
+  nav ul li a:hover {
+    color: #f1f1f1;
+  }
+  
+  /* -----------------------
+     Main Container
+  ------------------------ */
+  main {
+    margin: 20px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+  }
+  
+  .container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 20px;
+  }
+  
+  /* Tiêu đề đơn hàng */
+  .order-header h2 {
+    font-size: 1.8rem;
+    text-transform: uppercase;
+    color: #dd7a00; /* Màu cam đậm */
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+  }
+  
+  /* Thông tin đơn hàng (customer, total, etc.) */
+  .order-info {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  
+  .order-info div {
+    flex: 1;
+    min-width: 200px;
+    margin-right: 20px;
+    margin-bottom: 15px;
+  }
+  
+  .order-info h4 {
+    color: #dd7a00;
+    font-size: 1rem;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Danh sách sản phẩm */
+  .order-items {
+    margin-bottom: 20px;
+  }
+  
+  .order-items h3 {
+    color: #dd7a00;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  
+  /* Bảng danh sách sản phẩm */
+  .order-items table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+  }
+  
+  .order-items thead {
+    background-color: #e8af44; /* Cam nhạt */
+  }
+  
+  .order-items thead tr th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .order-items tbody tr td {
+    padding: 12px;
+    border-bottom: 1px solid #f2f2f2;
+    vertical-align: middle;
+  }
+  
+  .order-items tbody tr:nth-child(even) {
+    background-color: #fffaf2; /* Màu nền xen kẽ */
+  }
+  
+  .order-items tbody tr:hover {
+    background-color: #ffeece; /* Hiệu ứng hover nhẹ */
+  }
+  
+  /* Nút Quay lại */
+  .btn-back {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    font-size: 0.95rem;
+  }
+  
+  .btn-back:hover {
+    background-color: #0056b3;
+  }
+  
+  /* -----------------------
+     Footer
+  ------------------------ */
+  footer {
+    background: linear-gradient(90deg, #ec9a00, #f0bc4a);
+    color: #fff;
+    text-align: center;
+    padding: 15px 10px;
+    margin-top: 20px;
+    position: relative;
+  }
+  
+  footer p {
+    margin: 0;
+    font-size: 1rem;
+  }
+  
+  /* -----------------------
+     Responsive
+  ------------------------ */
+  @media (max-width: 768px) {
+    nav ul li {
+      margin: 0 8px;
+    }
+  
+    .order-info {
+      flex-direction: column;
+    }
+    .order-info div {
+      margin-right: 0;
+      margin-bottom: 15px;
+    }
+  
+    .order-items table, .order-items thead, .order-items tbody, .order-items th, .order-items td, .order-items tr {
+      display: block;
+    }
+  
+    .order-items thead tr {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+    }
+  
+    .order-items tbody tr {
+      margin-bottom: 15px;
+    }
+  
+    .order-items tbody tr td {
+      padding-left: 50%;
+      position: relative;
+    }
+  
+    .order-items tbody tr td:before {
+      content: attr(data-label);
+      position: absolute;
+      left: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+  }

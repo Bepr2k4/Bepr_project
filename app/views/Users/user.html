@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quản lý Người dùng</title>
+  <!-- Liên kết file CSS đã tách riêng -->
+  <link rel="stylesheet" href="/Css/User/user.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="container header-content">
+      <h1>Bảng Điều Khiển Người dùng</h1>
+    </div>
+  </header>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <ul class="nav-list">
+      <li><a href="/api/employees/Page">Nhân viên</a></li>
+      <li><a href="/api/products/Page">Sản phẩm</a></li>
+      <li><a href="/api/admin/adminPage">Admin</a></li>
+      <li><a href="/">Trang chủ</a></li>
+    </ul>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="container">
+    <h2>Quản lý Người dùng</h2>
+    
+    <!-- Form Tạo/Cập nhật Người dùng -->
+    <form id="user-form">
+      <!-- Trường ẩn dùng cho cập nhật -->
+      <input type="hidden" id="user-id">
+      <!-- Hidden field role luôn là "customer" -->
+      <input type="hidden" id="user-role" value="customer">
+      <div>
+        <label for="user-email">Email:</label>
+        <input type="email" id="user-email" required>
+      </div>
+      <div>
+        <label for="user-full-name">Họ tên:</label>
+        <input type="text" id="user-full-name" required>
+      </div>
+      <div>
+        <label for="user-phone">Số điện thoại:</label>
+        <input type="text" id="user-phone" required>
+      </div>
+      <div>
+        <label for="user-address">Địa chỉ:</label>
+        <input type="text" id="user-address" required>
+      </div>
+      <div>
+        <label for="user-password">Mật khẩu:</label>
+        <input type="password" id="user-password" required>
+      </div>
+      <button type="submit">Lưu</button>
+    </form>
+
+    <!-- Bảng hiển thị Danh sách Người dùng -->
+    <h2>Danh sách Người dùng</h2>
+    <table id="user-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>Họ tên</th>
+          <th>Số điện thoại</th>
+          <th>Địa chỉ</th>
+          <th>Vai trò</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Các dòng người dùng sẽ được thêm vào đây bằng JavaScript -->
+      </tbody>
+    </table>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Burger House. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const userForm = document.getElementById('user-form');
+      const userTableBody = document.getElementById('user-table').getElementsByTagName('tbody')[0];
+
+      // Hàm lấy danh sách người dùng từ API
+      function fetchUsers() {
+        axios.get('/api/users')
+          .then(response => {
+            const users = response.data;
+            // Lọc ra chỉ các user có role là "customer"
+            const customers = users.filter(user => user.role === "customer");
+            userTableBody.innerHTML = '';
+            customers.forEach(user => {
+              const row = userTableBody.insertRow();
+              row.innerHTML = `
+                <td>${user.user_id}</td>
+                <td>${user.email}</td>
+                <td>${user.full_name}</td>
+                <td>${user.phone}</td>
+                <td>${user.address}</td>
+                <td>${user.role}</td>
+                <td>
+                  <button onclick="editUser(${user.user_id})">Sửa</button>
+                  <button onclick="deleteUser(${user.user_id})">Xóa</button>
+                </td>
+              `;
+            });
+          })
+          .catch(error => {
+            console.error('Error fetching users:', error);
+          });
+      }
+
+      // Xử lý form tạo/cập nhật người dùng
+      userForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const userId = document.getElementById('user-id').value;
+        const role = document.getElementById('user-role').value; // "customer"
+        const userData = {
+          email: document.getElementById('user-email').value,
+          full_name: document.getElementById('user-full-name').value,
+          phone: document.getElementById('user-phone').value,
+          address: document.getElementById('user-address').value,
+          password: document.getElementById('user-password').value,
+          role: role
+        };
+
+        if (userId) {
+          // Cập nhật người dùng qua PUT /api/users/:id
+          axios.put(`/api/users/${userId}`, userData)
+            .then(response => {
+              alert(response.data.message);
+              fetchUsers();
+              userForm.reset();
+            })
+            .catch(error => {
+              console.error('Error updating user:', error);
+            });
+        } else {
+          // Tạo người dùng mới qua POST /api/users
+          axios.post('/api/users', userData)
+            .then(response => {
+              alert(response.data.message);
+              fetchUsers();
+              userForm.reset();
+            })
+            .catch(error => {
+              console.error('Error creating user:', error);
+            });
+        }
+      });
+
+      // Hàm sửa người dùng: gọi API GET /api/users/:id và điền thông tin vào form
+      window.editUser = function(id) {
+        axios.get(`/api/users/${id}`)
+          .then(response => {
+            const user = response.data;
+            if (user.role !== "customer") {
+              alert("User này không phải là customer.");
+              return;
+            }
+            document.getElementById('user-id').value = user.user_id;
+            document.getElementById('user-email').value = user.email;
+            document.getElementById('user-full-name').value = user.full_name;
+            document.getElementById('user-phone').value = user.phone;
+            document.getElementById('user-address').value = user.address;
+            document.getElementById('user-role').value = user.role;
+            // Không hiển thị mật khẩu hiện có
+            document.getElementById('user-password').value = '';
+          })
+          .catch(error => {
+            console.error('Error fetching user:', error);
+          });
+      };
+
+      // Hàm xóa người dùng: gọi API DELETE /api/users/:id
+      window.deleteUser = function(id) {
+        if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+          axios.delete(`/api/users/${id}`)
+            .then(response => {
+              alert(response.data.message);
+              fetchUsers();
+            })
+            .catch(error => {
+              console.error('Error deleting user:', error);
+            });
+        }
+      };
+
+      // Tải danh sách người dùng khi trang được load
+      fetchUsers();
+    });
+  </script>
+</body>
+</html>

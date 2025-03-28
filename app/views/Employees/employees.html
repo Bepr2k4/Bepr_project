@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quản lý Nhân viên</title>
+  <link rel="stylesheet" href="/Css/Employees/employees.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="container header-content">
+      <h1>Quản lý Nhân viên</h1>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="/">Trang chủ</a></li>
+        <li><a href="/api/products/Page">Sản phẩm</a></li>
+        <li><a href="/api/admin/adminPage">Admin</a></li>
+        <li><a href="/api/users/Page">khách hàng</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <div class="container">
+    <h2>Quản lý Nhân viên</h2>
+    <!-- Form Tạo/Cập nhật Nhân viên -->
+    <form id="employee-form">
+      <!-- Trường ẩn dùng cho cập nhật -->
+      <input type="hidden" id="employee-id">
+      <div>
+        <label for="employee-email">Email:</label>
+        <input type="email" id="employee-email" required>
+      </div>
+      <div>
+        <label for="employee-full-name">Họ tên:</label>
+        <input type="text" id="employee-full-name" required>
+      </div>
+      <div>
+        <label for="employee-phone">Số điện thoại:</label>
+        <input type="text" id="employee-phone" required>
+      </div>
+      <div>
+        <label for="employee-address">Địa chỉ:</label>
+        <input type="text" id="employee-address" required>
+      </div>
+      <div>
+        <label for="employee-password">Mật khẩu:</label>
+        <input type="password" id="employee-password" required>
+      </div>
+      <button type="submit">Lưu</button>
+    </form>
+
+    <!-- Bảng Hiển thị Danh sách Nhân viên -->
+    <h2>Danh sách Nhân viên</h2>
+    <table id="employee-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>Họ tên</th>
+          <th>Số điện thoại</th>
+          <th>Địa chỉ</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Các dòng nhân viên sẽ được thêm vào đây -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Burger House. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const employeeForm = document.getElementById('employee-form');
+      const employeeTableBody = document.getElementById('employee-table').getElementsByTagName('tbody')[0];
+
+      // Hàm lấy danh sách nhân viên (GET /api/employees)
+      function fetchEmployees() {
+        axios.get('/api/employees')
+          .then(response => {
+            const employees = response.data;
+            employeeTableBody.innerHTML = '';
+            employees.forEach(employee => {
+              const row = employeeTableBody.insertRow();
+              row.innerHTML = `
+                <td>${employee.user_id}</td>
+                <td>${employee.email}</td>
+                <td>${employee.full_name}</td>
+                <td>${employee.phone}</td>
+                <td>${employee.address}</td>
+                <td>
+                  <button onclick="editEmployee(${employee.user_id})">Sửa</button>
+                  <button onclick="deleteEmployee(${employee.user_id})">Xóa</button>
+                </td>
+              `;
+            });
+          })
+          .catch(error => {
+            console.error('Error fetching employees:', error);
+          });
+      }
+
+      // Xử lý form tạo/cập nhật nhân viên
+      employeeForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const employeeId = document.getElementById('employee-id').value;
+        const employeeData = {
+          email: document.getElementById('employee-email').value,
+          full_name: document.getElementById('employee-full-name').value,
+          phone: document.getElementById('employee-phone').value,
+          address: document.getElementById('employee-address').value,
+          password: document.getElementById('employee-password').value
+        };
+
+        if (employeeId) {
+          // Cập nhật nhân viên (PUT /api/employees/:id)
+          axios.put(`/api/employees/${employeeId}`, employeeData)
+            .then(response => {
+              alert(response.data.message);
+              fetchEmployees();
+              employeeForm.reset();
+            })
+            .catch(error => {
+              console.error('Error updating employee:', error);
+            });
+        } else {
+          // Tạo nhân viên mới (POST /api/employees)
+          axios.post('/api/employees', employeeData)
+            .then(response => {
+              alert(response.data.message);
+              fetchEmployees();
+              employeeForm.reset();
+            })
+            .catch(error => {
+              console.error('Error creating employee:', error);
+            });
+        }
+      });
+
+      // Hàm sửa nhân viên: Gọi API GET /api/employees/:id và điền thông tin vào form
+      window.editEmployee = function(id) {
+        axios.get(`/api/employees/${id}`)
+          .then(response => {
+            const employee = response.data;
+            document.getElementById('employee-id').value = employee.user_id;
+            document.getElementById('employee-email').value = employee.email;
+            document.getElementById('employee-full-name').value = employee.full_name;
+            document.getElementById('employee-phone').value = employee.phone;
+            document.getElementById('employee-address').value = employee.address;
+            // Xoá trường mật khẩu để không hiển thị giá trị đã băm
+            document.getElementById('employee-password').value = '';
+          })
+          .catch(error => {
+            console.error('Error fetching employee:', error);
+          });
+      };
+
+      // Hàm xóa nhân viên (DELETE /api/employees/:id)
+      window.deleteEmployee = function(id) {
+        if (confirm('Bạn có chắc chắn muốn xóa nhân viên này?')) {
+          axios.delete(`/api/employees/${id}`)
+            .then(response => {
+              alert(response.data.message);
+              fetchEmployees();
+            })
+            .catch(error => {
+              console.error('Error deleting employee:', error);
+            });
+        }
+      };
+
+      // Tải danh sách nhân viên khi trang được load
+      fetchEmployees();
+    });
+  </script>
+</body>
+</html>

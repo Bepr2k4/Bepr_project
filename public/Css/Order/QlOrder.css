@@ -1,0 +1,285 @@
+/* -----------------------
+   Reset & Base
+------------------------ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fff3dc; /* Màu nền nhạt, giảm độ sáng hơn so với #fff6e5 */
+  color: #333;
+  height: 100%;
+}
+
+/* -----------------------
+ Header
+------------------------ */
+header {
+  /* Giảm độ sáng của gradient */
+  background: linear-gradient(90deg, #ec9a00, #f0bc4a); 
+  padding: 20px;
+  text-align: center;
+  color: #fff;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+header h1 {
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+/* -----------------------
+ Navigation
+------------------------ */
+nav {
+  background-color: #ec9a00; /* Giảm độ sáng */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  align-items: center;
+}
+
+nav ul li {
+  margin: 0 15px;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: #fff;
+  font-size: 1rem;
+  transition: color 0.3s;
+  font-weight: 500;
+}
+
+nav ul li a:hover {
+  color: #f1f1f1;
+}
+
+/* -----------------------
+ Main Container
+------------------------ */
+.order-container {
+  max-width: 1200px;
+  margin: 20px auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden;
+  padding: 20px;
+}
+
+.order-container h2 {
+  text-align: center;
+  color: #dd7a00; /* Màu cam đậm hơn nhưng giảm độ sáng so với #ff8600 */
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* -----------------------
+ Table
+------------------------ */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+}
+
+thead {
+  /* Giảm độ sáng tiêu đề */
+  background-color: #e8af44;
+}
+
+thead tr th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+tbody tr td {
+  padding: 12px;
+  border-bottom: 1px solid #f2f2f2;
+  vertical-align: middle;
+}
+
+/* Màu nền xen kẽ */
+tbody tr:nth-child(even) {
+  background-color: #fffaf2; 
+}
+
+/* Hiệu ứng hover nhẹ */
+tbody tr:hover {
+  background-color: #ffeece; 
+}
+
+/* -----------------------
+ Actions Column
+------------------------ */
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.actions button, .actions select {
+  margin-right: 5px;
+  margin-bottom: 5px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* Nút Xem chi tiết */
+.btn-view {
+  background-color: #007bff;
+  color: #fff;
+  transition: background-color 0.3s;
+}
+.btn-view:hover {
+  background-color: #0056b3;
+}
+
+/* Nút Cập nhật */
+.btn-update {
+  background-color: #28a745;
+  color: #fff;
+  transition: background-color 0.3s;
+}
+.btn-update:hover {
+  background-color: #218838;
+}
+
+/* Nút Xóa */
+.btn-delete {
+  background-color: #dc3545;
+  color: #fff;
+  transition: background-color 0.3s;
+}
+.btn-delete:hover {
+  background-color: #c82333;
+}
+
+/* Dropdowns */
+.actions select {
+  background-color: #fff6e2; /* Giảm sáng so với #fffaeb */
+  border: 1px solid #e0b948; /* Giảm sáng so với #ffcf57 */
+  color: #333;
+}
+
+/* -----------------------
+ Modal
+------------------------ */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #dd7a00; /* Giảm độ sáng */
+  transition: color 0.3s;
+}
+.modal-close:hover {
+  color: #cc3800; /* Giảm độ sáng khi hover */
+}
+
+.modal h3 {
+  margin-top: 0;
+  color: #dd7a00;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* -----------------------
+ Footer
+------------------------ */
+footer {
+  background: linear-gradient(90deg, #ec9a00, #f0bc4a);
+  color: #fff;
+  text-align: center;
+  padding: 15px 10px;
+  margin-top: 20px;
+  position: relative;
+}
+
+footer p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* -----------------------
+ Responsive
+------------------------ */
+@media (max-width: 768px) {
+  nav ul li {
+      margin: 0 8px;
+  }
+
+  table, thead, tbody, th, td, tr {
+      display: block;
+  }
+  thead tr {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+  }
+  tbody tr {
+      margin-bottom: 15px;
+  }
+  tbody tr td {
+      padding-left: 50%;
+      position: relative;
+  }
+  tbody tr td:before {
+      content: attr(data-label);
+      position: absolute;
+      left: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+  }
+
+  .actions {
+      flex-direction: column;
+      align-items: flex-start;
+  }
+}

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Giỏ hàng - Burger House</title>
+  <link rel="stylesheet" href="/Css/Cart/cart.css">
+  <style>
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Burger House</h1>
+  </header>
+  <nav>
+    <ul>
+      <li><a href="/">Trang chủ</a></li>
+      <li><a href="/api/orders/page">Đơn hàng</a></li>
+      <li><a href="/auth/logout">Đăng xuất</a></li>
+    </ul>
+  </nav>
+  <main>
+    <div class="cart-card">
+      <!-- Phần tóm tắt giỏ hàng -->
+      <div class="summary">
+        <h3>Tóm tắt</h3>
+        <p>Số lượng sản phẩm: <span id="total-items">0</span></p>
+        <p>Tổng tiền: <span id="total-price">0</span> VND</p>
+        <!-- Thông tin giao hàng -->
+        <div class="checkout-info">
+          <label>Địa chỉ giao hàng:</label>
+          <p id="user-shipping-address" class="readonly-field">Đang tải...</p>
+          
+          <!-- Ngày giao hàng dự kiến (hiển thị theo dd/mm/yyyy hh:mm) -->
+          <label for="estimated-delivery">Ngày giao hàng dự kiến:</label>
+          <input 
+            type="text" 
+            id="estimated-delivery" 
+            placeholder="dd/mm/yyyy --:--" 
+            readonly
+          >
+          
+          <!-- Phương thức thanh toán mặc định -->
+          <label for="payment-method">Phương thức thanh toán:</label>
+          <select id="payment-method" disabled>
+            <option value="cash" selected>Tiền mặt</option>
+            <option value="credit_card">Thẻ tín dụng</option>
+            <option value="paypal">Paypal</option>
+          </select>
+        </div>
+        <button id="checkout-button">Thanh toán</button>
+      </div>
+
+      <!-- Phần danh sách giỏ hàng -->
+      <div class="cart-items">
+        <div class="title">
+          <h3>Giỏ hàng của bạn</h3>
+          <span id="item-count">0 items</span>
+        </div>
+        <div id="cart-items-container">
+          <!-- Sản phẩm sẽ được load tại đây -->
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <p>&copy; 2025 Burger House. All rights reserved.</p>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Hàm lấy cookie theo tên
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        return parts.length === 2 ? parts.pop().split(";").shift() : null;
+      }
+      
+      // Hàm định dạng ngày theo kiểu dd/mm/yyyy hh:mm
+      function formatDatetimeDDMMYYYY(date) {
+        const pad = (num) => num.toString().padStart(2, '0');
+        const dd = pad(date.getDate());
+        const mm = pad(date.getMonth() + 1);
+        const yyyy = date.getFullYear();
+        const hh = pad(date.getHours());
+        const min = pad(date.getMinutes());
+        return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+      }
+      
+      // Hàm chuyển đổi định dạng từ dd/mm/yyyy hh:mm sang MySQL datetime (YYYY-MM-DD HH:mm:ss)
+      function convertToMySQLDatetime(ddmmyyyy_hhmm) {
+        const [datePart, timePart] = ddmmyyyy_hhmm.split(" ");
+        const [dd, mm, yyyy] = datePart.split("/");
+        return `${yyyy}-${mm}-${dd} ${timePart}:00`;
+      }
+      
+      // Hàm giải mã token JWT (giả sử token chứa "user_id" và "address")
+      function parseToken(token) {
+        try {
+          const payload = token.split('.')[1];
+          return JSON.parse(atob(payload));
+        } catch (err) {
+          console.error("Lỗi khi giải mã token:", err);
+          return {};
+        }
+      }
+      
+      // Hàm cập nhật địa chỉ giao hàng vào phần hiển thị
+      function updateShippingAddress(address) {
+        document.getElementById("user-shipping-address").innerText = address;
+      }
+      
+      // Hàm tự động tính và hiển thị ngày giao hàng dự kiến (hiện tại + 1 giờ)
+      function updateEstimatedDelivery() {
+        const now = new Date();
+        const deliveryTime = new Date(now.getTime() + 3600000); // Cộng thêm 1 giờ
+        const estimatedDelivery = formatDatetimeDDMMYYYY(deliveryTime);
+        document.getElementById("estimated-delivery").value = estimatedDelivery;
+      }
+      
+      // Hàm load giỏ hàng từ API
+      async function loadCart() {
+        try {
+          const token = getCookie("token");
+          if (!token) {
+            console.error("Token không tồn tại, người dùng chưa đăng nhập!");
+            return;
+          }
+          const response = await axios.get("/api/cart", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const cartItems = response.data;
+          const container = document.getElementById("cart-items-container");
+          container.innerHTML = "";
+          let totalPrice = 0;
+          let totalItems = 0;
+  
+          cartItems.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            totalPrice += itemTotal;
+            totalItems += item.quantity;
+  
+            const itemDiv = document.createElement("div");
+            itemDiv.className = "item";
+            itemDiv.innerHTML = `
+              <img src="${item.image_path || '/images/default.jpg'}" alt="${item.name}">
+              <div class="item-details">
+                <h4>${item.name}</h4>
+                <p class="item-price">${item.price} VND</p>
+                <div class="quantity">
+                  <button class="quantity-btn" data-cart-item-id="${item.cart_item_id}" data-quantity="${item.quantity - 1}">-</button>
+                  <input type="number" class="quantity-input" value="${item.quantity}" min="1" data-cart-item-id="${item.cart_item_id}">
+                  <button class="quantity-btn" data-cart-item-id="${item.cart_item_id}" data-quantity="${item.quantity + 1}">+</button>
+                </div>
+              </div>
+              <button class="delete-btn" data-cart-item-id="${item.cart_item_id}">Xóa</button>
+            `;
+            container.appendChild(itemDiv);
+          });
+  
+          document.getElementById("total-price").innerText = totalPrice.toFixed(2);
+          document.getElementById("total-items").innerText = totalItems;
+          document.getElementById("item-count").innerText = `${totalItems} items`;
+  
+          // Gắn sự kiện cho các nút sau khi load giỏ hàng
+          addEventListenersToCartItems();
+        } catch (error) {
+          console.error("Lỗi khi tải giỏ hàng:", error);
+        }
+      }
+      
+      // Cập nhật số lượng sản phẩm
+      async function updateQuantity(cartItemId, newQuantity) {
+        newQuantity = parseInt(newQuantity);
+        if (isNaN(newQuantity) || newQuantity < 1) return;
+        try {
+          await axios.put(`/api/cart/${cartItemId}`, { quantity: newQuantity });
+          await loadCart();
+        } catch (error) {
+          console.error("Lỗi khi cập nhật số lượng:", error);
+        }
+      }
+      
+      // Xóa sản phẩm khỏi giỏ
+      async function removeItem(cartItemId) {
+        try {
+          await axios.delete(`/api/cart/${cartItemId}`);
+          await loadCart();
+        } catch (error) {
+          console.error("Lỗi khi xóa sản phẩm khỏi giỏ hàng:", error);
+        }
+      }
+      
+      // Gắn sự kiện cho các nút trong giỏ hàng
+      function addEventListenersToCartItems() {
+        const quantityButtons = document.querySelectorAll('.quantity-btn');
+        quantityButtons.forEach(button => {
+          button.addEventListener('click', () => {
+            const cartItemId = button.dataset.cartItemId;
+            const newQuantity = parseInt(button.dataset.quantity);
+            updateQuantity(cartItemId, newQuantity);
+          });
+        });
+  
+        const quantityInputs = document.querySelectorAll('.quantity-input');
+        quantityInputs.forEach(input => {
+          input.addEventListener('change', () => {
+            const cartItemId = input.dataset.cartItemId;
+            const newQuantity = parseInt(input.value);
+            updateQuantity(cartItemId, newQuantity);
+          });
+        });
+  
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        deleteButtons.forEach(button => {
+          button.addEventListener('click', () => {
+            const cartItemId = button.dataset.cartItemId;
+            removeItem(cartItemId);
+          });
+        });
+      }
+      
+      // Xử lý thanh toán khi nhấn nút "Thanh toán"
+      document.getElementById('checkout-button').addEventListener('click', async () => {
+        try {
+          const token = getCookie("token");
+          if (!token) {
+            console.error("Người dùng chưa đăng nhập!");
+            return;
+          }
+  
+          // Lấy thông tin giỏ hàng từ API
+          const cartResponse = await axios.get("/api/cart", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const cartItems = cartResponse.data;
+          const orderItems = cartItems.map(item => ({
+            food_id: item.food_id,
+            quantity: item.quantity,
+            price: item.price
+          }));
+  
+          // Giải mã token để lấy thông tin user
+          const tokenPayload = parseToken(token);
+          const userId = tokenPayload.user_id;
+          const userAddress = tokenPayload.address || "Chưa cập nhật địa chỉ";
+  
+          // Cập nhật hiển thị địa chỉ giao hàng
+          updateShippingAddress(userAddress);
+  
+          // Cập nhật ngày giao hàng dự kiến (hiện tại + 1 giờ)
+          updateEstimatedDelivery();
+  
+          // Phương thức thanh toán mặc định là "cash"
+          const paymentMethod = "cash";
+  
+          // Chuyển đổi định dạng estimated_delivery sang định dạng MySQL (YYYY-MM-DD HH:mm:ss)
+          const estimatedDeliveryMySQL = convertToMySQLDatetime(document.getElementById("estimated-delivery").value);
+  
+          const checkoutData = {
+            customer_id: userId,
+            total: parseFloat(document.getElementById("total-price").innerText),
+            status: "pending",
+            orderItems: orderItems,
+            shipping: {
+              address: userAddress,
+              delivery_status: "pending",
+              estimated_delivery: estimatedDeliveryMySQL
+            },
+            payment: {
+              amount: parseFloat(document.getElementById("total-price").innerText),
+              method: paymentMethod,
+              status: "pending"
+            }
+          };
+  
+          console.log("Checkout data:", checkoutData);
+  
+          const response = await axios.post('/api/orders/checkout', checkoutData, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          alert(response.data.message);
+          window.location.href = '/api/orders/page';
+        } catch (error) {
+          console.error("Lỗi khi thanh toán:", error);
+          alert("Thanh toán không thành công, vui lòng thử lại!");
+        }
+      });
+      
+      // Hàm chuyển đổi định dạng dd/mm/yyyy hh:mm sang MySQL datetime (YYYY-MM-DD HH:mm:ss)
+      function convertToMySQLDatetime(ddmmyyyy_hhmm) {
+        // Giả sử ddmmyyyy_hhmm có dạng "dd/mm/yyyy hh:mm"
+        const [datePart, timePart] = ddmmyyyy_hhmm.split(" ");
+        const [dd, mm, yyyy] = datePart.split("/");
+        return `${yyyy}-${mm}-${dd} ${timePart}:00`;
+      }
+      
+      // Khi trang được load, gọi các hàm cần thiết
+      await loadCart();
+      updateEstimatedDelivery();
+      
+      // Cập nhật địa chỉ giao hàng dựa trên token
+      const tokenVal = getCookie("token");
+      if (tokenVal) {
+        const tokenPayload = parseToken(tokenVal);
+        const userAddress = tokenPayload.address || "Chưa cập nhật địa chỉ";
+        updateShippingAddress(userAddress);
+      }
+    });
+  </script>
+</body>
+</html>

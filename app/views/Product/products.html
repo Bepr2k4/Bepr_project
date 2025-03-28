@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quản lý sản phẩm</title>
+  <link rel="stylesheet" href="/Css/Products/products.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <header><h1>Quản lý sản phẩm</h1></header>
+  <nav>
+    <ul>
+      <li><a href="/">Trang chủ</a></li>
+      <li><a href="/api/employees/Page">Nhân viên</a></li>
+      <li><a href="/api/admin/adminPage">Admin</a></li>
+      <li><a href="/api/users/Page">Khách hàng</a></li>
+    </ul>
+  </nav>
+  <main>
+    <div class="category-container">
+      <section class="add-category">
+        <h2>Thêm danh mục</h2>
+        <form id="add-category-form">
+          <label for="category-name">Tên danh mục:</label>
+          <input type="text" id="category-name" required>
+          
+          <label for="category-description">Mô tả danh mục:</label>
+          <textarea id="category-description" placeholder="Mô tả danh mục"></textarea>
+
+          <button type="submit">Thêm danh mục</button>
+        </form>
+      </section>
+  
+      <section class="categories-list">
+        <h2>Danh mục sản phẩm</h2>
+        <ul id="category-list"></ul>
+      </section>
+    </div>
+  
+    <section class="add-product">
+      <h2>Thêm sản phẩm</h2>
+      <form id="add-product-form">
+        <label for="category-select">Danh mục:</label>
+        <select id="category-select" required></select>
+  
+        <label for="image-url">Hình ảnh (URL):</label>
+        <input type="text" id="image-url" placeholder="URL hình ảnh">
+  
+        <label for="product-name">Tên:</label>
+        <input type="text" id="product-name" required>
+  
+        <label for="product-description">Mô tả:</label>
+        <textarea id="product-description" placeholder="Mô tả sản phẩm"></textarea>
+  
+        <label for="product-price">Giá:</label>
+        <input type="number" id="product-price" step="0.01" required>
+  
+        <label for="product-stock">Số lượng:</label>
+        <input type="number" id="product-stock" value="0">
+  
+        <button type="submit">Thêm sản phẩm</button>
+      </form>
+    </section>
+  
+    <section class="products-grid"></section>
+  </main>  
+  <footer><p>&copy; 2025 Burger House. All rights reserved.</p></footer>
+  <!-- Modal chỉnh sửa sản phẩm -->
+  <div id="edit-product-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h2>Chỉnh sửa sản phẩm</h2>
+      <form id="edit-product-form">
+        <input type="hidden" id="edit-product-id" name="product_id">
+        <label for="edit-category-select">Danh mục:</label>
+        <select name="category_id" id="edit-category-select" required></select>
+
+        <label for="edit-image-url">Hình ảnh (URL):</label>
+        <input type="text" id="edit-image-url" name="image" placeholder="URL hình ảnh">
+
+        <label for="edit-product-name">Tên:</label>
+        <input type="text" id="edit-product-name" name="name" required>
+
+        <label for="edit-product-description">Mô tả:</label>
+        <textarea id="edit-product-description" name="description" placeholder="Mô tả sản phẩm"></textarea>
+
+        <label for="edit-product-price">Giá:</label>
+        <input type="number" id="edit-product-price" step="0.01" name="price" required>
+        <label for="edit-product-stock">Số lượng:</label>
+        <input type="number" id="edit-product-stock" name="stock" value="0">
+        <button type="submit">Cập nhật</button>
+        <button type="button" class="cancel-edit-product">Hủy</button>
+      </form>
+    </div>
+  </div>
+  <!-- Modal chỉnh sửa danh mục -->
+  <div id="edit-category-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close-modal-category">&times;</span>
+      <h2>Chỉnh sửa danh mục</h2>
+      <form id="edit-category-form">
+        <input type="hidden" id="edit-category-id">
+        <label for="edit-category-name">Tên danh mục:</label>
+        <input type="text" id="edit-category-name" required>
+        <label for="edit-category-description">Mô tả danh mục:</label>
+        <textarea id="edit-category-description" placeholder="Mô tả danh mục"></textarea>
+        <button type="submit">Cập nhật</button>
+        <button type="button" class="cancel-edit-category">Hủy</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const categoryList = document.getElementById('category-list');
+      const categorySelect = document.getElementById('category-select');
+      const productsGrid = document.querySelector('.products-grid');
+      const editProductModal = document.getElementById('edit-product-modal');
+      const closeModal = document.querySelector('.close-modal');
+      const editProductForm = document.getElementById('edit-product-form');
+      const editProductId = document.getElementById('edit-product-id');
+      const editProductName = document.getElementById('edit-product-name');
+      const editProductDescription = document.getElementById('edit-product-description');
+      const editProductStock = document.getElementById('edit-product-stock');
+      const editImageUrl = document.getElementById('edit-image-url');
+      const editCategorySelect = document.getElementById('edit-category-select');
+      const editProductPrice = document.getElementById('edit-product-price');
+      const editCategoryModal = document.getElementById('edit-category-modal');
+      const closeModalCategory = document.querySelector('.close-modal-category');
+      const editCategoryForm = document.getElementById('edit-category-form');
+      const editCategoryId = document.getElementById('edit-category-id');
+      const editCategoryName = document.getElementById('edit-category-name');
+      const editCategoryDescription = document.getElementById('edit-category-description');
+      const cancelEditProductButton = document.querySelector('.cancel-edit-product');
+      const cancelEditCategoryButton = document.querySelector('.cancel-edit-category');
+      
+      async function fetchCategories() {
+        try {
+          const { data } = await axios.get('/api/categories');
+          categoryList.innerHTML = '';
+          categorySelect.innerHTML = '<option value="">Chọn danh mục</option>';
+          editCategorySelect.innerHTML = '<option value="">Chọn danh mục</option>';
+          data.forEach(({ category_id, name, description }) => { // Get description
+            categoryList.innerHTML += `<li>ID: ${category_id} - ${name} - Description: ${description}
+              <button data-id="${category_id}" data-name="${name}" data-description="${description}" class="edit-category-btn">Sửa</button>
+              <button data-id="${category_id}" class="delete-category-btn">Xóa</button>
+            </li>`;
+            categorySelect.innerHTML += `<option value="${category_id}">${name}</option>`;
+            editCategorySelect.innerHTML += `<option value="${category_id}">${name}</option>`;
+          });
+        } catch (error) {
+          console.error('Lỗi tải danh mục:', error);
+        }
+      }
+      
+      async function fetchProducts() {
+        try {
+          const { data } = await axios.get('/api/products');
+          productsGrid.innerHTML = '';
+          data.forEach(({ food_id, name, price, description, stock, image_path, category_id }) => {
+            productsGrid.innerHTML += `
+              <div class="product-item">
+                <img src="${image_path || '/image/default.jpg'}" alt="${name}" class="product-image">
+                <h3>${name}</h3>
+                <p>Giá: ${price} VND</p>
+                <button class="edit-product-btn" data-id="${food_id}" data-name="${name}" 
+                  data-price="${price}" data-description="${description}" data-stock="${stock}" 
+                  data-image="${image_path}" data-category="${category_id}">Sửa</button>
+                <button class="delete-product-btn" data-id="${food_id}">Xóa</button>
+              </div>`;
+          });
+        } catch (error) {
+          console.error('Lỗi tải sản phẩm:', error);
+        }
+      }
+      
+      document.getElementById('add-category-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const categoryName = document.getElementById('category-name').value;
+        const categoryDescription = document.getElementById('category-description').value; // Get description
+        if (!categoryName) {
+          alert('Vui lòng nhập tên danh mục.');
+          return;
+        }
+        try {
+          await axios.post('/api/categories', { name: categoryName, description: categoryDescription }); // Send description
+          alert('Thêm danh mục thành công!');
+          fetchCategories();
+        } catch (error) {
+          console.error('Lỗi khi thêm danh mục:', error);
+        }
+      });
+
+      categoryList.addEventListener('click', async (event) => {
+        if (event.target.classList.contains('delete-category-btn')) {
+          const id = event.target.dataset.id;
+          if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
+            try {
+              await axios.delete(`/api/categories/${id}`);
+              alert('Xóa danh mục thành công!');
+              fetchCategories();
+            } catch (error) {
+              console.error('Lỗi khi xóa danh mục:', error);
+            }
+          }
+        }
+        if (event.target.classList.contains('edit-category-btn')) {
+          editCategoryId.value = event.target.dataset.id;
+          editCategoryName.value = event.target.dataset.name;
+          editCategoryDescription.value = event.target.dataset.description;
+          editCategoryModal.style.display = 'block';
+        }
+      });
+      closeModalCategory.addEventListener('click', () => {
+        editCategoryModal.style.display = 'none';
+      });
+      cancelEditCategoryButton.addEventListener('click', () => {
+        editCategoryModal.style.display = 'none';
+      });
+
+      editCategoryForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        try {
+          await axios.put(`/api/categories/${editCategoryId.value}`, {
+            name: editCategoryName.value,
+            description: editCategoryDescription.value,
+          });
+          alert('Cập nhật danh mục thành công!');
+          editCategoryModal.style.display = 'none';
+          fetchCategories();
+        } catch (error) {
+          console.error('Lỗi khi cập nhật danh mục:', error);
+        }
+      });
+
+      productsGrid.addEventListener('click', (event) => {
+        if (event.target.classList.contains('edit-product-btn')) {
+            editProductId.value = event.target.dataset.id;
+            editProductName.value = event.target.dataset.name;
+            editProductPrice.value = event.target.dataset.price;
+            editProductDescription.value = event.target.dataset.description;
+            editProductStock.value = event.target.dataset.stock;
+            editImageUrl.value = event.target.dataset.image;
+            editCategorySelect.value = event.target.dataset.category;
+            editProductModal.style.display = 'block';
+
+        }
+      });
+
+      closeModal.addEventListener('click', () => {
+        editProductModal.style.display = 'none';
+      });
+      cancelEditProductButton.addEventListener('click', () => {
+        editProductModal.style.display = 'none';
+      });
+
+      editProductForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        try {
+          await axios.put(`/api/products/${editProductId.value}`, {
+            name: editProductName.value,
+            price: editProductPrice.value,
+            description: editProductDescription.value,
+            stock: editProductStock.value,
+            image_path: editImageUrl.value,
+            category_id: editCategorySelect.value
+          });
+          alert('Cập nhật sản phẩm thành công!');
+          editProductModal.style.display = 'none';
+          fetchProducts();
+        } catch (error) {
+          console.error('Lỗi khi cập nhật sản phẩm:', error);
+        }
+      });
+
+      productsGrid.addEventListener('click', async (event) => {
+        if (event.target.classList.contains('delete-product-btn')) {
+          const id = event.target.dataset.id;
+          if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+            try {
+              await axios.delete(`/api/products/${id}`);
+              alert('Xóa sản phẩm thành công!');
+              fetchProducts();
+            } catch (error) {
+              console.error('Lỗi khi xóa sản phẩm:', error);
+            }
+          }
+        }
+      });
+      
+      await fetchCategories();
+      await fetchProducts();
+    });
+  </script>
+</body>
+</html>

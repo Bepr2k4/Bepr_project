@@ -1,0 +1,124 @@
+/* RESET CSS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Tổng quan */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f8f9fa;
+    color: #333;
+  }
+  
+  /* Container chung */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* HEADER */
+  header {
+    background: #007bff;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  /* NAVIGATION */
+  nav {
+    background: #007bff;
+    padding: 10px 0;
+  }
+  
+  .nav-list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .nav-list li a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+  }
+  
+  /* FORM */
+  form {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  form div {
+    margin-bottom: 10px;
+  }
+  
+  form label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  form input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+  }
+  
+  table, th, td {
+    border: 1px solid #ddd;
+  }
+  
+  th, td {
+    padding: 10px;
+    text-align: left;
+  }
+  
+  th {
+    background: #f2f2f2;
+  }
+  
+  /* BUTTONS */
+  button {
+    padding: 8px 12px;
+    background: #d2280c;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+    transition: background 0.3s ease;
+  }
+  
+  button:hover {
+    background: #a51c07;
+  }
+  
+  /* FOOTER */
+  footer {
+    background: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+  }
+  

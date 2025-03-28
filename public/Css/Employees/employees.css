@@ -1,0 +1,254 @@
+/* employees.css */
+
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header Styles */
+header {
+  background-color: #333;
+  color: #fff;
+  padding: 10px 0;
+  text-align: center;
+}
+
+.header-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2em;
+}
+
+nav {
+  background-color: #444;
+  padding: 10px 0;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav li {
+  margin: 0 15px;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: #ddd;
+}
+
+/* Main Content Styles */
+.container {
+  padding: 20px;
+}
+
+h2 {
+  margin-top: 20px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* Form Styles */
+#employee-form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+#employee-form div {
+  margin-bottom: 15px;
+}
+
+#employee-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+#employee-form input[type="email"],
+#employee-form input[type="text"],
+#employee-form input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+#employee-form button[type="submit"] {
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#employee-form button[type="submit"]:hover {
+  background-color: #555;
+}
+
+/* Table Styles */
+#employee-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#employee-table th,
+#employee-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+#employee-table th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+#employee-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+#employee-table tbody tr:hover {
+  background-color: #f0f0f0;
+}
+
+#employee-table button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 2px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+#employee-table button:last-child {
+    background-color: #f44336; /* Red */
+}
+
+#employee-table button:hover{
+    opacity: 0.8;
+}
+
+/* Footer Styles */
+footer {
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 10px 0;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  header h1 {
+    font-size: 1.5em;
+  }
+
+  nav ul {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  nav li {
+    margin: 10px 0;
+  }
+
+  #employee-form input[type="email"],
+  #employee-form input[type="text"],
+  #employee-form input[type="password"] {
+    width: 100%;
+  }
+}
+
+/* Modern, Bright, and Colorful Theme */
+body {
+  background-color: #e9f5ff; /* Light Blue */
+  color: #2c3e50; /* Dark Blue */
+}
+
+header {
+  background-color: #3498db; /* Blue */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+nav {
+  background-color: #2980b9; /* Darker Blue */
+}
+
+nav a:hover {
+  color: #ecf0f1; /* Light Gray */
+}
+
+h2 {
+  color: #34495e; /* Dark Blue */
+}
+
+#employee-form {
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#employee-form button[type="submit"] {
+  background-color: #27ae60; /* Green */
+}
+
+#employee-form button[type="submit"]:hover {
+  background-color: #2ecc71; /* Lighter Green */
+}
+
+#employee-table {
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#employee-table th {
+  background-color: #f0f0f0;
+}
+#employee-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+#employee-table tbody tr:nth-child(odd) {
+  background-color: #f0f0f0;
+}

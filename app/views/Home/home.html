@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Burger House</title>
+  <link rel="stylesheet" href="/Css/home/home.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="container header-content">
+      <div  class="logo">
+        <h1>Burger House</h1>
+      </div>
+      <nav>
+        <ul class="nav-list" id="nav-list">
+          <li><a href="/">Home</a></li>
+          <li><a href="/api/admin/adminPage" id="admin-link" style="display: none;">Admin</a></li>
+          <li><a href="/api/products/page" id="products-link" style="display: none;">Products</a></li>
+          <li><a href="/api/employees/Page" id="employees-link" style="display: none;">Employees</a></li>
+          <li><a href="/api/users/Page" id="users-link" style="display: none;">Người dùng</a></li>
+          <li><a href="/api/cart/page" id="cart-link"style="display: none;">Giỏ Hàng</a></li>
+          <li><a href="/api/orders/QLpage" id="cartManager-link"style="display: none;">Quảng lý giỏ Hàng</a></li>
+          <li><a href="/auth/login" id="login-link">Đăng nhập</a></li>
+          <li><a href="/auth/register" id="register-link">Đăng ký</a></li>
+          <li><a href="/auth/logout" id="logout-link" style="display: none;">Đăng xuất</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="hero-section">
+    <div class="container hero-content">
+      <div class="hero-text">
+        <h2>BURGER WEEK</h2>
+        <p>Thưởng thức những chiếc burger ngon nhất với giá cực kỳ hấp dẫn!</p>
+        <div class="hero-price-circle">
+          <span>Chỉ từ<br />50.000 VND</span>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="/image/foods/maplebaconburger.jpg" alt="Burger Image" />
+      </div>
+    </div>
+  </section>
+
+  <!-- CHOOSE & ENJOY SECTION -->
+  <section class="choose-enjoy">
+    <div class="container">
+      <h2 class="section-title">CHOOSE & ENJOY</h2>
+      <div class="burger-list" id="burger-list">
+        <!-- Các món burger sẽ được thêm vào đây -->
+      </div>
+    </div>
+  </section>
+
+  <!-- UPCOMING EVENTS SECTION -->
+  <section class="events">
+    <div class="container">
+      <h2 class="section-title">UPCOMING EVENTS</h2>
+      <div class="events-content">
+        <div class="event-text">
+          <p>
+            Chúng tôi thường xuyên tổ chức các sự kiện hấp dẫn: giảm giá, 
+            giới thiệu món mới, thử thách ăn burger khổng lồ... Theo dõi trang 
+            web và fanpage để không bỏ lỡ những sự kiện thú vị sắp tới!
+          </p>
+        </div>
+        <div class="event-image">
+          <img src="/image/foods/Margherita_Pizza.jpg" alt="Upcoming Event">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Burger House. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const burgerList = document.getElementById('burger-list');
+      const adminLink = document.getElementById('admin-link');
+      const productsLink = document.getElementById('products-link');
+      const employeesLink = document.getElementById('employees-link');
+      const cartManagerLink = document.getElementById('cartManager-link');
+      const usersLink = document.getElementById('users-link');
+      const cartLink = document.getElementById('cart-link');
+      const loginLink = document.getElementById('login-link');
+      const registerLink = document.getElementById('register-link');
+      const logoutLink = document.getElementById('logout-link');
+
+      // Hàm lấy tất cả sản phẩm
+      function fetchProducts() {
+        axios.get('/api/products')
+          .then(response => {
+            const products = response.data;
+            burgerList.innerHTML = '';
+            products.forEach(product => {
+              // Sử dụng image_path từ API, nếu không có thì dùng ảnh placeholder
+              const imageUrl = product.image_path ? product.image_path : 'img/burger-placeholder.png';
+              const burgerItem = document.createElement('div');
+              burgerItem.classList.add('burger-item');
+              burgerItem.innerHTML = `
+                <img src="${imageUrl}" alt="${product.name}" 
+                     class="burger-image" 
+                     data-image-url="${imageUrl}">
+                <h3>${product.name}</h3>
+                <p>${product.description || ''}</p>
+                <p>Giá: ${product.price} VND</p>
+                <button onclick="window.location.href='/api/products/Page/${product.food_id}'">Mua</button>
+              `;
+              burgerList.appendChild(burgerItem);
+            });
+          })
+          .catch(error => console.error('Error fetching products:', error));
+      }
+
+      // Hàm kiểm tra trạng thái đăng nhập và vai trò người dùng
+      function checkUserRole() {
+        axios.get('/auth/user')
+          .then(response => {
+            const user = response.data;
+            if (user) {
+              loginLink.style.display = 'none';
+              registerLink.style.display = 'none';
+              logoutLink.style.display = 'block';
+
+              if (user.role === 'admin') {
+                adminLink.style.display = 'block';
+                productsLink.style.display = 'block';
+                employeesLink.style.display = 'block';
+                usersLink.style.display = 'block';
+                cartManagerLink.style.display = 'block';
+              } else if (user.role === 'employee') {
+                productsLink.style.display = 'block';
+                employeesLink.style.display = 'block';
+                usersLink.style.display = 'block';
+                cartManagerLink.style.display = 'block';
+              } else if (user.role === 'customer') {
+                cartLink.style.display = 'block';
+              }
+            }
+          })
+          .catch(error => console.error('Error checking user role:', error));
+      }
+
+      // Lấy danh sách tất cả sản phẩm khi trang được tải
+      fetchProducts();
+      checkUserRole();
+    });
+  </script>
+</body>
+</html>

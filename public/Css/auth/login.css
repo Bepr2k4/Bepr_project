@@ -1,0 +1,154 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Impact', sans-serif;
+    background: #4a4a69; /* Màu nền tổng thể */
+    color: #333;
+    /* Đảm bảo trang chiếm đủ chiều cao để căn giữa */
+    min-height: 100vh;
+  }
+  
+  /* Container chính, thu nhỏ và căn giữa trên màn hình */
+  .login-container {
+    display: flex;
+    width: 90%;                /* Chiều rộng tối đa của bố cục */
+    max-width: 1000px;         /* Giới hạn chiều rộng tối đa */
+    min-height: 70vh;          /* Chiều cao tối thiểu để phần nội dung */
+    margin: 5vh auto;          /* Căn giữa theo chiều ngang, cách mép trên 5vh */
+    border-radius: 8px;        /* Bo góc nhẹ nếu cần */
+    overflow: hidden;          /* Đảm bảo phần tử con không tràn */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    background: #2f2f44;       /* Tạm đặt nền chung, bên dưới 2 section */
+  }
+  
+  /* Phần bên trái */
+  .left-section {
+    flex: 1;
+    background: #dd8838; /* Nền tối hoặc gradient: linear-gradient(135deg, #3f3f5e, #2f2f44) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem; /* Tạo khoảng trống thay vì position relative */
+    color: #fff;
+  }
+  
+  /* Nội dung bên trái */
+  .left-content {
+    max-width: 400px;
+    text-align: left;
+  }
+  
+  /* Nút back */
+  .back-button {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: #d2280c;
+    text-decoration: none;
+    border: 1px solid #444;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+  .back-button:hover {
+    background: #d2280c;
+    color: #fff;
+  }
+  
+  /* Branding, mô tả bên trái */
+  .branding h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  .branding p {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+  
+  /* Phần bên phải */
+  .right-section {
+    flex: 1;
+    background: #f8f8fc; /* Nền sáng */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem; /* Tạo khoảng trống */
+  }
+  
+  /* Form đăng nhập */
+  .form-wrapper {
+    width: 100%;
+    max-width: 400px;
+    background: #fff; /* Màu nền form */
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 2rem;
+  }
+  
+  /* Tiêu đề form */
+  .form-wrapper h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    color: #2f2f44;
+  }
+  
+  /* Form Bootstrap override */
+  .form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #555;
+  }
+  .form-control {
+    border-radius: 5px;
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  /* Nút submit */
+  .btn-primary {
+    background-color: #2f2f44;
+    border-color: #2f2f44;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .btn-primary:hover {
+    background-color: #494967;
+    border-color: #494967;
+  }
+  
+  /* Link chuyển sang đăng ký */
+  .switch-auth {
+    text-align: center;
+    margin-top: 1rem;
+  }
+  .switch-auth a {
+    color: #2f2f44;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .switch-auth a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Responsive cho màn hình nhỏ */
+  @media (max-width: 768px) {
+    .login-container {
+      flex-direction: column;
+      min-height: auto;
+      margin: 2rem auto; /* Giảm khoảng cách trên/dưới */
+    }
+    .left-section, .right-section {
+      width: 100%;
+      padding: 2rem 1rem;
+    }
+    .left-content {
+      max-width: 100%;
+    }
+    .form-wrapper {
+      max-width: 100%;
+    }
+  }
+  

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quản lý đơn hàng - Burger House</title>
+  <link rel="stylesheet" href="/Css/Order/QlOrder.css">
+  <style>
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Burger House - Quản lý đơn hàng</h1>
+  </header>
+  <nav>
+    <ul>
+      <li><a href="/">Trang chủ</a></li>
+      <li><a href="/api/orders/QLpage">Quản lý đơn hàng</a></li>
+      <li><a href="/auth/logout">Đăng xuất</a></li>
+    </ul>
+  </nav>
+  <main>
+    <div class="order-container">
+      <h2>Danh Sách Đơn Hàng</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Mã Đơn Hàng</th>
+            <th>Khách Hàng</th>
+            <th>Tổng Tiền (VND)</th>
+            <th>Ngày Đặt</th>
+            <th>Trạng Thái</th>
+            <th>Hành Động</th>
+          </tr>
+        </thead>
+        <tbody id="orders-tbody">
+          <!-- Danh sách đơn hàng sẽ được load động tại đây -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+  <footer>
+    <p>&copy; 2025 Burger House. All rights reserved.</p>
+  </footer>
+
+  <!-- Modal hiển thị chi tiết đơn hàng -->
+  <div id="orderModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <div id="modalBody">
+        <h3>Chi tiết đơn hàng</h3>
+        <div id="order-details-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Axios CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    // Hàm lấy cookie theo tên
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      return parts.length === 2 ? parts.pop().split(";").shift() : null;
+    }
+  
+    // Load tất cả đơn hàng từ API
+    async function loadAllOrders() {
+      try {
+        const token = getCookie("token");
+        if (!token) {
+          console.error("Admin chưa đăng nhập!");
+          return;
+        }
+        const response = await axios.get("/api/orders", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const orders = response.data;
+        const ordersTbody = document.getElementById("orders-tbody");
+        ordersTbody.innerHTML = "";
+  
+        if (!orders.length) {
+          ordersTbody.innerHTML = `<tr>
+            <td colspan="6" style="text-align:center;">Không có đơn hàng nào.</td>
+          </tr>`;
+          return;
+        }
+  
+        orders.forEach(order => {
+          const row = document.createElement("tr");
+  
+          // Mã đơn hàng
+          const orderIdTd = document.createElement("td");
+          orderIdTd.setAttribute("data-label", "Mã Đơn Hàng");
+          orderIdTd.textContent = `#${order.order_id}`;
+          row.appendChild(orderIdTd);
+  
+          // Khách hàng
+          const customerTd = document.createElement("td");
+          customerTd.setAttribute("data-label", "Khách Hàng");
+          customerTd.textContent = order.customer_id;
+          row.appendChild(customerTd);
+  
+          // Tổng tiền
+          const totalTd = document.createElement("td");
+          totalTd.setAttribute("data-label", "Tổng Tiền (VND)");
+          totalTd.textContent = order.total;
+          row.appendChild(totalTd);
+  
+          // Ngày đặt
+          const createdTd = document.createElement("td");
+          createdTd.setAttribute("data-label", "Ngày Đặt");
+          createdTd.textContent = new Date(order.created_at).toLocaleString('vi-VN');
+          row.appendChild(createdTd);
+  
+          // Trạng thái hiện tại (Order)
+          const statusTd = document.createElement("td");
+          statusTd.setAttribute("data-label", "Trạng Thái");
+          statusTd.textContent = order.status;
+          row.appendChild(statusTd);
+  
+          // Hành động: nút xem chi tiết, dropdown cập nhật trạng thái cho order, payment và shipping, nút cập nhật và nút xóa
+          const actionTd = document.createElement("td");
+          actionTd.setAttribute("data-label", "Hành Động");
+          actionTd.classList.add("actions");
+  
+          // Nút "Xem chi tiết"
+          const btnView = document.createElement("button");
+          btnView.className = "btn-view";
+          btnView.textContent = "Xem chi tiết";
+          btnView.addEventListener("click", () => showOrderDetails(order.order_id));
+          actionTd.appendChild(btnView);
+  
+          // Dropdown trạng thái đơn hàng
+          const orderSelect = document.createElement("select");
+          orderSelect.id = `orderStatusSelect_${order.order_id}`;
+          const orderStatuses = ["pending", "processing", "shipped", "delivered", "cancelled"];
+          orderStatuses.forEach(statusValue => {
+            const option = document.createElement("option");
+            option.value = statusValue;
+            option.text = statusValue.charAt(0).toUpperCase() + statusValue.slice(1);
+            if (order.status === statusValue) option.selected = true;
+            orderSelect.appendChild(option);
+          });
+          actionTd.appendChild(orderSelect);
+  
+          // Dropdown trạng thái thanh toán (nếu có)
+          const paymentSelect = document.createElement("select");
+          paymentSelect.id = `paymentStatusSelect_${order.order_id}`;
+          const paymentStatuses = ["pending", "completed", "failed"];
+          let currentPaymentStatus = "pending";
+          if (order.payments && order.payments.length > 0) {
+            currentPaymentStatus = order.payments[0].status;
+          }
+          paymentStatuses.forEach(statusValue => {
+            const option = document.createElement("option");
+            option.value = statusValue;
+            option.text = statusValue.charAt(0).toUpperCase() + statusValue.slice(1);
+            if (currentPaymentStatus === statusValue) option.selected = true;
+            paymentSelect.appendChild(option);
+          });
+          actionTd.appendChild(paymentSelect);
+  
+          // Dropdown trạng thái giao hàng (nếu có)
+          const shippingSelect = document.createElement("select");
+          shippingSelect.id = `shippingStatusSelect_${order.order_id}`;
+          const shippingStatuses = ["pending", "in_transit", "delivered"];
+          let currentShippingStatus = "pending";
+          if (order.shipping) {
+            currentShippingStatus = order.shipping.delivery_status;
+          }
+          shippingStatuses.forEach(statusValue => {
+            const option = document.createElement("option");
+            option.value = statusValue;
+            option.text = statusValue === "in_transit" ? "In Transit" : statusValue.charAt(0).toUpperCase() + statusValue.slice(1);
+            if (currentShippingStatus === statusValue) option.selected = true;
+            shippingSelect.appendChild(option);
+          });
+          actionTd.appendChild(shippingSelect);
+  
+          // Nút "Cập nhật" tất cả trạng thái
+          const btnUpdate = document.createElement("button");
+          btnUpdate.className = "btn-update";
+          btnUpdate.textContent = "Cập nhật";
+          btnUpdate.addEventListener("click", () => updateAllStatuses(order));
+          actionTd.appendChild(btnUpdate);
+  
+          // Nút "Xóa"
+          const btnDelete = document.createElement("button");
+          btnDelete.className = "btn-delete";
+          btnDelete.textContent = "Xóa";
+          btnDelete.addEventListener("click", () => deleteOrder(order.order_id));
+          actionTd.appendChild(btnDelete);
+  
+          row.appendChild(actionTd);
+          ordersTbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error("Lỗi khi tải đơn hàng:", error);
+      }
+    }
+  
+    // Hàm hiển thị chi tiết đơn hàng trong modal
+    // Nếu thông tin sản phẩm (name) không có trong order, gọi API /api/products/:food_id để lấy tên sản phẩm
+    async function showOrderDetails(orderId) {
+      try {
+        const token = getCookie("token");
+        if (!token) {
+          console.error("Admin chưa đăng nhập!");
+          return;
+        }
+        const response = await axios.get(`/api/orders/${orderId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        let order = response.data;
+  
+        // Nếu order.orderItems tồn tại, cập nhật tên sản phẩm nếu chưa có
+        if (order.orderItems && order.orderItems.length > 0) {
+          await Promise.all(order.orderItems.map(async (item) => {
+            if (!item.name) {
+              // Gọi API lấy thông tin sản phẩm theo food_id
+              try {
+                const prodResponse = await axios.get(`/api/products/${item.food_id}`, {
+                  headers: { Authorization: `Bearer ${token}` }
+                });
+                item.name = prodResponse.data.name || "Không có tên";
+              } catch (prodError) {
+                console.error(`Lỗi khi lấy sản phẩm ${item.food_id}:`, prodError);
+                item.name = "Không có tên";
+              }
+            }
+          }));
+        }
+  
+        const modalContent = `
+          <h3>Đơn hàng #${order.order_id}</h3>
+          <p><strong>Khách hàng:</strong> ${order.customer_id}</p>
+          <p><strong>Tổng tiền:</strong> ${order.total} VND</p>
+          <p><strong>Trạng thái đơn hàng:</strong> ${order.status}</p>
+          <p><strong>Ngày đặt:</strong> ${new Date(order.created_at).toLocaleString('vi-VN')}</p>
+          <hr>
+          <h4>Chi tiết sản phẩm:</h4>
+          ${
+            order.orderItems && order.orderItems.length 
+            ? `<ul>${order.orderItems.map(item => {
+                return `<li>
+                  ${item.quantity} x <a target="_blank">${item.name}</a> (Giá: ${item.price} VND)
+                </li>`;
+              }).join('')}</ul>`
+            : `<p>Không có sản phẩm nào.</p>`
+          }
+          <hr>
+          <h4>Thông tin giao hàng:</h4>
+          ${
+            order.shipping 
+            ? `<p><strong>Địa chỉ:</strong> ${order.shipping.address}</p>
+               <p><strong>Trạng thái giao hàng:</strong> ${order.shipping.delivery_status}</p>
+               <p><strong>Ngày giao dự kiến:</strong> ${
+                 order.shipping.estimated_delivery 
+                   ? new Date(order.shipping.estimated_delivery).toLocaleString('vi-VN') 
+                   : "Chưa cập nhật"
+               }</p>`
+            : `<p>Không có thông tin giao hàng.</p>`
+          }
+          <hr>
+          <h4>Thông tin thanh toán:</h4>
+          ${
+            order.payments && order.payments.length 
+            ? `<ul>${order.payments.map(p => `
+                <li>
+                  Số tiền: ${p.amount} VND, Phương thức: ${p.method}, Trạng thái: ${p.status}
+                </li>`).join('')}</ul>`
+            : `<p>Không có thông tin thanh toán.</p>`
+          }
+        `;
+  
+        document.getElementById("order-details-content").innerHTML = modalContent;
+        document.getElementById("orderModal").style.display = "block";
+      } catch (error) {
+        console.error("Lỗi khi lấy chi tiết đơn hàng:", error);
+        alert("Không thể tải chi tiết đơn hàng!");
+      }
+    }
+  
+    // Hàm cập nhật tất cả trạng thái: order, payment, shipping
+    async function updateAllStatuses(order) {
+      try {
+        const token = getCookie("token");
+        if (!token) {
+          console.error("Admin chưa đăng nhập!");
+          return;
+        }
+  
+        // Lấy trạng thái được chọn
+        const orderStatus = document.getElementById(`orderStatusSelect_${order.order_id}`).value;
+        const paymentStatus = document.getElementById(`paymentStatusSelect_${order.order_id}`).value;
+        const shippingStatus = document.getElementById(`shippingStatusSelect_${order.order_id}`).value;
+  
+        // Cập nhật trạng thái đơn hàng
+        const orderPayload = { type: "order", id: order.order_id, status: orderStatus };
+        await axios.put("/api/orders/status", orderPayload, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+  
+        // Cập nhật trạng thái thanh toán nếu có
+        if (order.payments && order.payments.length > 0) {
+          const paymentId = order.payments[0].payment_id;
+          const paymentPayload = { type: "payment", id: paymentId, status: paymentStatus };
+          await axios.put("/api/orders/status", paymentPayload, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        }
+  
+        // Cập nhật trạng thái giao hàng nếu có
+        if (order.shipping) {
+          const shippingId = order.shipping.shipping_id;
+          const shippingPayload = { type: "shipping", id: shippingId, status: shippingStatus };
+          await axios.put("/api/orders/status", shippingPayload, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        }
+  
+        alert("Cập nhật trạng thái thành công!");
+        loadAllOrders();
+      } catch (error) {
+        console.error("Lỗi khi cập nhật trạng thái:", error);
+        alert(error.response?.data?.error || "Cập nhật không thành công!");
+      }
+    }
+  
+    // Xóa đơn hàng
+    async function deleteOrder(orderId) {
+      try {
+        const token = getCookie("token");
+        if (!token) {
+          console.error("Admin chưa đăng nhập!");
+          return;
+        }
+        const response = await axios.delete(`/api/orders/${orderId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert(response.data.message);
+        loadAllOrders();
+      } catch (error) {
+        console.error("Lỗi khi xóa đơn hàng:", error);
+        alert("Xóa đơn hàng không thành công!");
+      }
+    }
+  
+    // Đóng modal
+    function closeModal() {
+      document.getElementById("orderModal").style.display = "none";
+    }
+  
+    // Sự kiện đóng modal
+    document.getElementById("modalClose").addEventListener("click", closeModal);
+    window.addEventListener("click", event => {
+      if (event.target === document.getElementById("orderModal")) {
+        closeModal();
+      }
+    });
+  
+    // Load đơn hàng khi trang load
+    document.addEventListener("DOMContentLoaded", loadAllOrders);
+  </script>
+</body>
+</html>

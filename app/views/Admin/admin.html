@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bảng Điều Khiển Admin</title>
+  <link rel="stylesheet" href="/Css/Admin/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Bảng Điều Khiển Admin</h1>
+  </header>
+  <nav>
+    <ul>
+      <li><a href="/api/employees/Page">Nhân viên</a></li>
+      <li><a href="/api/products/Page">Sản phẩm</a></li>
+      <li><a href="/api/users/Page">Khách hàng</a></li>
+      <li><a href="/">Trang chủ</a></li>
+    </ul>
+  </nav>
+  <main>
+    <!-- Form tạo/cập nhật Admin -->
+    <h2>Quản lý Admin</h2>
+    <form id="admin-form">
+      <input type="hidden" id="admin-id">
+      <div>
+        <label for="admin-email">Email:</label>
+        <input type="email" id="admin-email" required>
+      </div>
+      <div>
+        <label for="admin-password">Mật khẩu:</label>
+        <input type="password" id="admin-password" required>
+      </div>
+      <div>
+        <label for="admin-full-name">Họ tên:</label>
+        <input type="text" id="admin-full-name" required>
+      </div>
+      <div>
+        <label for="admin-phone">Số điện thoại:</label>
+        <input type="text" id="admin-phone" required>
+      </div>
+      <div>
+        <label for="admin-address">Địa chỉ:</label>
+        <input type="text" id="admin-address" required>
+      </div>
+      <button type="submit">Lưu</button>
+    </form>
+
+    <!-- Bảng hiển thị danh sách tất cả admin -->
+    <h2>Danh sách Admin</h2>
+    <table id="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>Họ tên</th>
+          <th>Số điện thoại</th>
+          <th>Địa chỉ</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Các dòng admin sẽ được thêm vào đây -->
+      </tbody>
+    </table>
+  </main>
+  <footer>
+    <p>&copy; 2025 Công ty XYZ</p>
+  </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const adminForm = document.getElementById('admin-form');
+      const adminTableBody = document.getElementById('admin-table').getElementsByTagName('tbody')[0];
+
+      // Hàm lấy tất cả admin
+      function fetchAdmins() {
+        axios.get('/api/admin')
+          .then(response => {
+            const admins = response.data;
+            adminTableBody.innerHTML = '';
+            admins.forEach(admin => {
+              const row = adminTableBody.insertRow();
+              row.innerHTML = `
+                <td>${admin.user_id}</td>
+                <td>${admin.email}</td>
+                <td>${admin.full_name}</td>
+                <td>${admin.phone}</td>
+                <td>${admin.address}</td>
+                <td>
+                  <button onclick="editAdmin(${admin.user_id})">Sửa</button>
+                  <button onclick="deleteAdmin(${admin.user_id})">Xóa</button>
+                </td>
+              `;
+            });
+          })
+          .catch(error => console.error('Error fetching admins:', error));
+      }
+
+      // Xử lý form tạo/cập nhật Admin
+      adminForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const adminId = document.getElementById('admin-id').value;
+        const adminData = {
+          email: document.getElementById('admin-email').value,
+          password: document.getElementById('admin-password').value,
+          full_name: document.getElementById('admin-full-name').value,
+          phone: document.getElementById('admin-phone').value,
+          address: document.getElementById('admin-address').value
+        };
+
+        if (adminId) {
+          // Cập nhật admin đã tồn tại
+          axios.put(`/api/admin/${adminId}`, adminData)
+            .then(response => {
+              alert(response.data.message);
+              fetchAdmins();
+              adminForm.reset();
+            })
+            .catch(error => console.error('Error updating admin:', error));
+        } else {
+          // Tạo admin mới
+          axios.post('/api/admin', adminData)
+            .then(response => {
+              alert(response.data.message);
+              fetchAdmins();
+              adminForm.reset();
+            })
+            .catch(error => console.error('Error creating admin:', error));
+        }
+      });
+
+      // Hàm sửa admin sử dụng endpoint GET /admin/:id
+      window.editAdmin = function(id) {
+        axios.get(`/api/admin/${id}`)
+          .then(response => {
+            const admin = response.data;
+            document.getElementById('admin-id').value = admin.user_id;
+            document.getElementById('admin-email').value = admin.email;
+            document.getElementById('admin-password').value = '';
+            document.getElementById('admin-full-name').value = admin.full_name;
+            document.getElementById('admin-phone').value = admin.phone;
+            document.getElementById('admin-address').value = admin.address;
+          })
+          .catch(error => console.error('Error fetching admin:', error));
+      };
+
+      // Hàm xóa admin sử dụng endpoint DELETE /admin/:id
+      window.deleteAdmin = function(id) {
+        if (confirm('Bạn có chắc chắn muốn xóa admin này?')) {
+          axios.delete(`/api/admin/${id}`)
+            .then(response => {
+              alert(response.data.message);
+              fetchAdmins();
+            })
+            .catch(error => console.error('Error deleting admin:', error));
+        }
+      };
+
+      // Lấy danh sách tất cả admin khi trang được tải
+      fetchAdmins();
+    });
+  </script>
+</body>
+</html>
